@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第二大脑 - Second Brain</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .sidebar-item {
+      transition: all 0.2s ease;
+    }
+    
+    .sidebar-item:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .sidebar-item.active {
+      background-color: #f0f0f0;
+      font-weight: 500;
+    }
+    
+    .card {
+      transition: all 0.2s ease;
+      border: 1px solid #e5e5e5;
+    }
+    
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transform: translateY(-1px);
+    }
+    
+    .tag {
+      transition: all 0.15s ease;
+    }
+    
+    .tag:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .type-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    .type-note { background-color: #dbeafe; color: #1e40af; }
+    .type-conversation { background-color: #dcfce7; color: #166534; }
+    .type-memory { background-color: #f3e8ff; color: #7c3aed; }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-neutral-50 text-neutral-900">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-neutral-200 h-screen sticky top-0 flex flex-col">
+      <div class="p-6 border-b border-neutral-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-brain text-white text-lg"></i>
+          </div>
+          <div>
+            <h1 class="font-semibold text-lg">第二大脑</h1>
+            <p class="text-xs text-neutral-400">Second Brain</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="flex-1 p-4">
+        <div class="space-y-1" id="menu-items">
+          <button class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm active">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-sparkles text-sm w-4"></i>
+              <span>全部内容</span>
+            </div>
+            <span class="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">5</span>
+          </button>
+          <button class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-neutral-600">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-file-lines text-sm w-4"></i>
+              <span>笔记</span>
+            </div>
+            <span class="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">1</span>
+          </button>
+          <button class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-neutral-600">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-comments text-sm w-4"></i>
+              <span>对话</span>
+            </div>
+            <span class="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">2</span>
+          </button>
+          <button class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-neutral-600">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-brain text-sm w-4"></i>
+              <span>记忆</span>
+            </div>
+            <span class="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">2</span>
+          </button>
+        </div>
+
+        <div class="mt-8">
+          <h3 class="text-xs font-medium text-neutral-400 uppercase tracking-wider px-3 mb-3">标签</h3>
+          <div class="flex flex-wrap gap-2 px-3" id="tag-cloud">
+            <span class="tag text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full cursor-pointer">飞书</span>
+            <span class="tag text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full cursor-pointer">配置</span>
+            <span class="tag text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full cursor-pointer">生产力</span>
+            <span class="tag text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full cursor-pointer">健康</span>
+            <span class="tag text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full cursor-pointer">技术</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-neutral-200">
+        <button class="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50 rounded-lg transition-colors">
+          <i class="fa-solid fa-gear text-sm"></i>
+          <span>设置</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto">
+      <!-- Header -->
+      <header class="sticky top-0 z-10 bg-neutral-50/80 backdrop-blur-md border-b border-neutral-200 px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 max-w-xl">
+            <div class="relative">
+              <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm"></i>
+              <input
+                type="text"
+                id="search-input"
+                placeholder="搜索笔记、对话、记忆..."
+                class="search-input w-full pl-10 pr-4 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm transition-all"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button class="flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors">
+              <i class="fa-solid fa-plus text-sm"></i>
+              <span>新建</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="px-8 py-6">
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-8" id="stats-container">
+          <div class="bg-white rounded-xl border border-neutral-200 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 bg-neutral-50 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-sparkles text-neutral-600"></i>
+              </div>
+              <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-900">5</p>
+            <p class="text-sm text-neutral-400 mt-1">总内容数</p>
+          </div>
+          <div class="bg-white rounded-xl border border-neutral-200 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 bg-neutral-50 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-comments text-neutral-600"></i>
+              </div>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-900">2</p>
+            <p class="text-sm text-neutral-400 mt-1">本周对话</p>
+          </div>
+          <div class="bg-white rounded-xl border border-neutral-200 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 bg-neutral-50 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-file-lines text-neutral-600"></i>
+              </div>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-900">1</p>
+            <p class="text-sm text-neutral-400 mt-1">笔记数量</p>
+          </div>
+          <div class="bg-white rounded-xl border border-neutral-200 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-10 h-10 bg-neutral-50 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-brain text-neutral-600"></i>
+              </div>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-900">2</p>
+            <p class="text-sm text-neutral-400 mt-1">记忆条目</p>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-2">
+            <button class="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-600 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">
+              <i class="fa-regular fa-clock text-sm"></i>
+              <span>最近更新</span>
+            </button>
+            <button class="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-600 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">
+              <i class="fa-regular fa-calendar text-sm"></i>
+              <span>时间范围</span>
+            </button>
+            <button class="flex items-center gap-2 px-3 py-1.5 text-sm text-neutral-600 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">
+              <i class="fa-solid fa-tag text-sm"></i>
+              <span>标签</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-neutral-400">共 5 条内容</span>
+          </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-2 gap-4" id="content-grid">
+          <!-- Card 1 -->
+          <div class="card bg-white rounded-xl p-5 animate-fade-in cursor-pointer">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center type-conversation">
+                  <i class="fa-solid fa-comments"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-900">飞书机器人配置</h3>
+                  <div class="flex items-center gap-2 text-xs text-neutral-400 mt-0.5">
+                    <span>对话</span>
+                    <span>·</span>
+                    <span>30分钟前</span>
+                    <span>·</span>
+                    <span class="text-neutral-300">feishu</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-neutral-600 mb-3 line-clamp-2">完成飞书机器人配置和喝水提醒设置</p>
+            <p class="text-sm text-neutral-500 line-clamp-3 mb-4">用户配置了飞书机器人，App ID: cli_a917d254a03a9bd1。设置了每天4个时间点的喝水提醒：10:00、12:00、15:00、18:00。</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">飞书</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">机器人</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">配置</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-neutral-300 text-sm"></i>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="card bg-white rounded-xl p-5 animate-fade-in cursor-pointer">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center type-memory">
+                  <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-900">用户偏好记录</h3>
+                  <div class="flex items-center gap-2 text-xs text-neutral-400 mt-0.5">
+                    <span>记忆</span>
+                    <span>·</span>
+                    <span>2小时前</span>
+                    <span>·</span>
+                    <span class="text-neutral-300">memory</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-neutral-600 mb-3 line-clamp-2">用户对第二大脑和生产力工具有强烈需求</p>
+            <p class="text-sm text-neutral-500 line-clamp-3 mb-4">用户希望构建第二大脑系统，用于管理笔记、对话和记忆。对生产力工具感兴趣，安装了多个 skills。</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">偏好</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">系统</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">生产力</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-neutral-300 text-sm"></i>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="card bg-white rounded-xl p-5 animate-fade-in cursor-pointer">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center type-note">
+                  <i class="fa-solid fa-file-lines"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-900">OpenClaw 配置笔记</h3>
+                  <div class="flex items-center gap-2 text-xs text-neutral-400 mt-0.5">
+                    <span>笔记</span>
+                    <span>·</span>
+                    <span>昨天</span>
+                    <span>·</span>
+                    <span class="text-neutral-300">manual</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-neutral-600 mb-3 line-clamp-2">OpenClaw 本地配置详情</p>
+            <p class="text-sm text-neutral-500 line-clamp-3 mb-4">OpenClaw gateway 运行在本地，端口 18789。Feishu 通道已启用，使用 WebSocket 长连接模式。</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">openclaw</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">配置</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">技术</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-neutral-300 text-sm"></i>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="card bg-white rounded-xl p-5 animate-fade-in cursor-pointer">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center type-conversation">
+                  <i class="fa-solid fa-comments"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-900">Skills 探索</h3>
+                  <div class="flex items-center gap-2 text-xs text-neutral-400 mt-0.5">
+                    <span>对话</span>
+                    <span>·</span>
+                    <span>3小时前</span>
+                    <span>·</span>
+                    <span class="text-neutral-300">kimi</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-neutral-600 mb-3 line-clamp-2">发现并尝试安装多个实用 skills</p>
+            <p class="text-sm text-neutral-500 line-clamp-3 mb-4">探索了 clawhub 上的 skills：todoist、github、summarize、spotify-player、openai-whisper。由于限流暂时未能安装。</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">skills</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">clawhub</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">探索</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-neutral-300 text-sm"></i>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="card bg-white rounded-xl p-5 animate-fade-in cursor-pointer">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center type-memory">
+                  <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-900">喝水提醒系统</h3>
+                  <div class="flex items-center gap-2 text-xs text-neutral-400 mt-0.5">
+                    <span>记忆</span>
+                    <span>·</span>
+                    <span>4小时前</span>
+                    <span>·</span>
+                    <span class="text-neutral-300">memory</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-neutral-600 mb-3 line-clamp-2">建立了喝水提醒习惯系统</p>
+            <p class="text-sm text-neutral-500 line-clamp-3 mb-4">用户要求每天提醒喝水，设置了4个时间点。用户说"都听你的"，表现出对建议的信任。</p>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">健康</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">习惯</span>
+                <span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">提醒</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-neutral-300 text-sm"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Mock Data
+    const mockData = [
+      {
+        id: "1",
+        type: "conversation",
+        title: "飞书机器人配置",
+        content: "用户配置了飞书机器人，App ID: cli_a917d254a03a9bd1。设置了每天4个时间点的喝水提醒：10:00、12:00、15:00、18:00。",
+        summary: "完成飞书机器人配置和喝水提醒设置",
+        tags: ["飞书", "机器人", "配置"],
+        createdAt: new Date(Date.now() - 1000 * 60 * 30),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 30),
+        source: "feishu"
+      },
+      {
+        id: "2",
+        type: "memory",
+        title: "用户偏好记录",
+        content: "用户希望构建第二大脑系统，用于管理笔记、对话和记忆。对生产力工具感兴趣，安装了多个 skills。",
+        summary: "用户对第二大脑和生产力工具有强烈需求",
+        tags: ["偏好", "系统", "生产力"],
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+        source: "memory"
+      },
+      {
+        id: "3",
+        type: "note",
+        title: "OpenClaw 配置笔记",
+        content: "OpenClaw gateway 运行在本地，端口 18789。Feishu 通道已启用，使用 WebSocket 长连接模式。",
+        summary: "OpenClaw 本地配置详情",
+        tags: ["openclaw", "配置", "技术"],
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+        source: "manual"
+      },
+      {
+        id: "4",
+        type: "conversation",
+        title: "Skills 探索",
+        content: "探索了 clawhub 上的 skills：todoist、github、summarize、spotify-player、openai-whisper。由于限流暂时未能安装。",
+        summary: "发现并尝试安装多个实用 skills",
+        tags: ["skills", "clawhub", "探索"],
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
+        source: "kimi"
+      },
+      {
+        id: "5",
+        type: "memory",
+        title: "喝水提醒系统",
+        content: "用户要求每天提醒喝水，设置了4个时间点。用户说"都听你的"，表现出对建议的信任。",
+        summary: "建立了喝水提醒习惯系统",
+        tags: ["健康", "习惯", "提醒"],
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
+        updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
+        source: "memory"
+      }
+    ];
+
+    // State
+    let activeTab = 'all';
+    let searchQuery = '';
+
+    // Type Config
+    const typeConfig = {
+      note: { icon: 'fa-file-lines', color: 'type-note', label: '笔记' },
+      conversation: { icon: 'fa-comments', color: 'type-conversation', label: '对话' },
+      memory: { icon: 'fa-brain', color: 'type-memory', label: '记忆' },
+    };
+
+    // Format Date
+    function formatDate(date) {
+      const now = new Date();
+      const diff = now - date;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      
+      if (hours < 1) return '刚刚';
+      if (hours < 24) return `${hours}小时前`;
+      if (hours < 48) return '昨天';
+      
+      return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+    }
+
+    // Get Counts
+    function getCounts() {
+      return {
+        all: mockData.length,
+        note: mockData.filter(i => i.type === 'note').length,
+        conversation: mockData.filter(i => i.type === 'conversation').length,
+        memory: mockData.filter(i => i.type === 'memory').length,
+      };
+    }
+
+    // Render Menu
+    function renderMenu() {
+      const counts = getCounts();
+      const menuItems = [
+        { id: 'all', icon: 'fa-sparkles', label: '全部内容', count: counts.all },
+        { id: 'note', icon: 'fa-file-lines', label: '笔记', count: counts.note },
+        { id: 'conversation', icon: 'fa-comments', label: '对话', count: counts.conversation },
+        { id: 'memory', icon: 'fa-brain', label: '记忆', count: counts.memory },
+      ];
+
+      const container = document.getElementById('menu-items');
+      container.innerHTML = menuItems.map(item => `
+        <button
+          onclick="setActiveTab('${item.id}')"
+          class="sidebar-item w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm ${activeTab === item.id ? 'active' : 'text-neutral-600'}"
+        >
+          <div class="flex items-center gap-3">
+            <i class="fa-solid ${item.icon} text-sm w-4"></i>
+            <span>${item.label}</span>
+          </div>
+          <span class="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">${item.count}</span>
+        </button>
+      `).join('');
+    }
+
+    // Render Tags
+    function renderTags() {
+      const allTags = [...new Set(mockData.flatMap(item => item.tags))];
+      const container = document.getElementById('tag-cloud');
+      container.innerHTML = allTags.map(tag => `
+        <span
+          onclick="searchByTag('${tag}')"
+          class="tag text-xs px-2.5 py-1 bg-neutral-100 text-neutral-600 rounded-full cursor-pointer"
+        >${tag}</span>
+      `).join('');
+    }
+
+    // Render Stats
+    function renderStats() {
+      const counts = getCounts();
+      const stats = [
+        { title: '总内容数', value: counts.all, icon: 'fa-sparkles', trend: '+12%' },
+        { title: '本周对话', value: counts.conversation, icon: 'fa-comments' },
+        { title: '笔记数量', value: counts.note, icon: 'fa-file-lines' },
+        { title: '记忆条目', value: counts.memory, icon: 'fa-brain' },
+      ];
+
+      const container = document.getElementById('stats-container');
+      container.innerHTML = stats.map(stat => `
+        <div class="bg-white rounded-xl border border-neutral-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 bg-neutral-50 rounded-lg flex items-center justify-center">
+              <i class="fa-solid ${stat.icon} text-neutral-600"></i>
+            </div>
+            ${stat.trend ? `<span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">${stat.trend}</span>` : ''}
+          </div>
+          <p class="text-2xl font-semibold text-neutral-900">${stat.value}</p>
+          <p class="text-sm text-neutral-400 mt-1">${stat.title}</p>
+        </div>
+      `).join('');
+    }
+
+    // Render Content
+    function renderContent() {
+      const filtered = mockData
+        .filter(item => {
+          const matchesTab = activeTab === 'all' || item.type === activeTab;
+          const matchesSearch = searchQuery === '' ||
+            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+          return matchesTab && matchesSearch;
+        })
+        .sort((a, b) => b.updatedAt - a.updatedAt);
+
+      document.getElementById('content-count').textContent = `共 ${filtered.length} 条内容`;
+
+      const container = document.getElementById('content-grid');
+      const emptyState = document.getElementById('empty-state');
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      container.innerHTML = filtered.map(item => {
+        const config = typeConfig[item.type];
+        return `
+          <div class="card bg-white rounded-xl p-5 animate-fade-in cursor-pointer">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center ${config.color}">
+                  <i class="fa-solid ${config.icon}"></i>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-900">${item.title}</h3>
+                  <div class="flex items-center gap-2 text-xs text-neutral-400 mt-0.5">
+                    <span>${config.label}</span>
+                    <span>·</span>
+                    <span>${formatDate(item.updatedAt)}</span>
+                    ${item.source ? `<span>·</span><span class="text-neutral-300">${item.source}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            ${item.summary ? `<p class="text-sm text-neutral-600 mb-3 line-clamp-2">${item.summary}</p>` : ''}
+
+            <p class="text-sm text-neutral-500 line-clamp-3 mb-4">${item.content}</p>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                ${item.tags.map(tag => `<span class="text-xs px-2 py-1 bg-neutral-50 text-neutral-500 rounded-md">${tag}</span>`).join('')}
+              </div>
+              <i class="fa-solid fa-chevron-right text-neutral-300 text-sm"></i>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Actions
+    function setActiveTab(tab) {
+      activeTab = tab;
+      renderMenu();
+      renderContent();
+    }
+
+    function searchByTag(tag) {
+      document.getElementById('search-input').value = tag;
+      searchQuery = tag;
+      renderContent();
+    }
+
+    // Event Listeners
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderContent();
+    });
+
+    // Initial Render
+    renderMenu();
+    renderTags();
+    renderStats();
+    renderContent();
+  </script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 {
   "version": 2,
   "name": "second-brain",
-  "buildCommand": null,
+  "buildCommand": "echo 'Static site'",
   "outputDirectory": ".",
   "framework": null,
-  "installCommand": null,
+  "installCommand": "echo 'No install needed'",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
